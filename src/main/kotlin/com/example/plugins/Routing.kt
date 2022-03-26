@@ -8,6 +8,10 @@ data class HelloResponse(
     val message: String
 )
 
+data class User(
+    val id: Int
+)
+
 fun Application.configureRouting() {
     routing {
         get("/") {
@@ -16,8 +20,13 @@ fun Application.configureRouting() {
         }
     }
     routing {
-        get("/users/{user}") {
-            this.call.respond(HelloResponse("Hello, ${call.parameters["user"]}"))
+        route("/users") {
+            get {
+                this.call.respond(listOf(User(1), User(2)))
+            }
+            get("/{user}") {
+                this.call.respond(HelloResponse("Hello, ${call.parameters["user"]}"))
+            }
         }
     }
 }
