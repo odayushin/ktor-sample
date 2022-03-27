@@ -3,14 +3,22 @@ package com.example.plugins
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class HelloResponse(
     val message: String
 )
 
+@Serializable
 data class User(
     val id: Int
-)
+) {
+    companion object {
+        fun create(id: Int) = User(id)
+        fun createUsers() = (0..9).map { create(it) }
+    }
+}
 
 fun Application.configureRouting() {
     routing {
@@ -22,10 +30,13 @@ fun Application.configureRouting() {
     routing {
         route("/users") {
             get {
-                this.call.respond(listOf(User(1), User(2)))
+                this.call.respond(User.createUsers())
             }
-            get("/{user}") {
-                this.call.respond(HelloResponse("Hello, ${call.parameters["user"]}"))
+            get("/{userId}") {
+                val users = User.createUsers()
+                val id = call.parameters["userId"]?.toInt()
+                if (id !in users.indices) this.call.respond("Not Found")
+                this.call.respond(User.createUsers()[id!!])
             }
         }
     }
